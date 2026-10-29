@@ -14,13 +14,12 @@ public class ProductRestMapper {
 		if (request == null) {
 			return null;
 		}
-		return RegisterProductCommand.builder()
-				.nombre(request.getNombre())
-				.descripcion(request.getDescripcion())
-				.precio(request.getPrecio())
-				.categoria(request.getCategoria())
-				.stock(request.getStock())
-				.build();
+		return new RegisterProductCommand(
+				request.getNombre(),
+				request.getDescripcion(),
+				request.getPrecio(),
+				request.getCategoria(),
+				request.getStock());
 	}
 
 	public ProductoResponse toResponse(Product product) {

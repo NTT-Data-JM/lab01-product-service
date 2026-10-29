@@ -48,7 +48,7 @@ com.nttdata.product
 │   ├── model/Product               Entidad de dominio inmutable (Lombok @Value @Builder)
 │   ├── exception/                  Excepciones de negocio
 │   └── port
-│       ├── in/                     Puertos de entrada: *UseCase + comandos (*Command)
+│       ├── in/                     Puertos de entrada: *UseCase + comandos (*Command, record)
 │       └── out/                    Puertos de salida: *Port
 ├── application                     ← Casos de uso. Java puro, sin Spring.
 │   └── service/ProductApplicationService
@@ -102,7 +102,8 @@ con ArchUnit: si se rompen, el build falla.
 
 Uso de **Lombok**:
 
-- Modelo de dominio y comandos: `@Value` + `@Builder` (inmutables).
+- Modelo de dominio: `@Value` + `@Builder` (inmutable, igualdad por SKU).
+- Comandos de entrada: `record` de Java (inmutables, igualdad por todos los campos).
 - Entidades de persistencia: `@Getter` + `@Builder`.
 - Inyección de dependencias: `@RequiredArgsConstructor` con campos `private final` (sin `@Autowired`).
 - Logs: `@Slf4j`.

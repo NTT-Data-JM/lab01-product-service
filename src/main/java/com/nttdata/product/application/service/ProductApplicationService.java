@@ -33,11 +33,11 @@ public class ProductApplicationService implements RegisterProductUseCase, ListPr
 		validate(command);
 		Product product = Product.builder()
 				.id(skuGeneratorPort.nextSku())
-				.nombre(command.getNombre().trim())
-				.descripcion(trimToNull(command.getDescripcion()))
-				.precio(command.getPrecio())
-				.categoria(command.getCategoria().trim())
-				.stock(command.getStock())
+				.nombre(command.nombre().trim())
+				.descripcion(trimToNull(command.descripcion()))
+				.precio(command.precio())
+				.categoria(command.categoria().trim())
+				.stock(command.stock())
 				.fechaCreacion(OffsetDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS))
 				.build();
 		return productRepositoryPort.save(product);
@@ -60,16 +60,16 @@ public class ProductApplicationService implements RegisterProductUseCase, ListPr
 		if (command == null) {
 			throw new InvalidProductException("El producto es obligatorio");
 		}
-		if (command.getNombre() == null || command.getNombre().isBlank()) {
+		if (command.nombre() == null || command.nombre().isBlank()) {
 			throw new InvalidProductException("El nombre es obligatorio");
 		}
-		if (command.getPrecio() == null || command.getPrecio() < 0) {
+		if (command.precio() == null || command.precio() < 0) {
 			throw new InvalidProductException("El precio debe ser mayor o igual a cero");
 		}
-		if (command.getCategoria() == null || command.getCategoria().isBlank()) {
+		if (command.categoria() == null || command.categoria().isBlank()) {
 			throw new InvalidProductException("La categoría es obligatoria");
 		}
-		if (command.getStock() != null && command.getStock() < 0) {
+		if (command.stock() != null && command.stock() < 0) {
 			throw new InvalidProductException("El stock no puede ser negativo");
 		}
 	}

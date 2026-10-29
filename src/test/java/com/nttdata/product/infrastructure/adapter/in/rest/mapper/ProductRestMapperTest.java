@@ -22,8 +22,7 @@ class ProductRestMapperTest {
 
 		RegisterProductCommand command = mapper.toCommand(request);
 
-		assertThat(command).isEqualTo(RegisterProductCommand.builder().nombre("Laptop").descripcion("16GB")
-				.precio(1200.5).categoria("Tecnología").stock(10).build());
+		assertThat(command).isEqualTo(new RegisterProductCommand("Laptop", "16GB", 1200.5, "Tecnología", 10));
 	}
 
 	@Test

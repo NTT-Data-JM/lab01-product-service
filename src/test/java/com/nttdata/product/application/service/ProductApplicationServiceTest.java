@@ -52,9 +52,9 @@ class ProductApplicationServiceTest {
 		service = new ProductApplicationService(productRepositoryPort, skuGeneratorPort, Clock.fixed(NOW, ZoneOffset.UTC));
 	}
 
-	private static RegisterProductCommand.RegisterProductCommandBuilder validCommand() {
-		return RegisterProductCommand.builder().nombre("Laptop Lenovo ThinkPad").descripcion("Laptop empresarial")
-				.precio(1200.50).categoria("Tecnología").stock(10);
+	private static RegisterProductCommand command(String nombre, String descripcion, Double precio, String categoria,
+			Integer stock) {
+		return new RegisterProductCommand(nombre, descripcion, precio, categoria, stock);
 	}
 
 	@Test
@@ -62,8 +62,7 @@ class ProductApplicationServiceTest {
 		when(skuGeneratorPort.nextSku()).thenReturn("SKU-000001");
 		when(productRepositoryPort.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		Product result = service.register(validCommand().nombre("  Laptop  ").descripcion("  16GB  ")
-				.categoria("  Tecnología ").build());
+		Product result = service.register(command("  Laptop  ", "  16GB  ", 1200.50, "  Tecnología ", 10));
 
 		ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
 		verify(productRepositoryPort).save(captor.capture());
@@ -85,7 +84,7 @@ class ProductApplicationServiceTest {
 		when(skuGeneratorPort.nextSku()).thenReturn("SKU-000001");
 		when(productRepositoryPort.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		Product result = service.register(validCommand().descripcion(descripcion).build());
+		Product result = service.register(command("Laptop Lenovo ThinkPad", descripcion, 1200.50, "Tecnología", 10));
 
 		assertThat(result.getDescripcion()).isNull();
 	}
@@ -95,7 +94,7 @@ class ProductApplicationServiceTest {
 		when(skuGeneratorPort.nextSku()).thenReturn("SKU-000001");
 		when(productRepositoryPort.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		Product result = service.register(validCommand().stock(null).precio(0.0).build());
+		Product result = service.register(command("Laptop Lenovo ThinkPad", "Laptop empresarial", 0.0, "Tecnología", null));
 
 		assertThat(result.getStock()).isNull();
 		assertThat(result.getPrecio()).isZero();
@@ -110,13 +109,18 @@ class ProductApplicationServiceTest {
 
 	static Stream<Arguments> comandosInvalidos() {
 		return Stream.of(
-				Arguments.of(validCommand().nombre(null).build(), "El nombre es obligatorio"),
-				Arguments.of(validCommand().nombre("  ").build(), "El nombre es obligatorio"),
-				Arguments.of(validCommand().precio(null).build(), "El precio debe ser mayor o igual a cero"),
-				Arguments.of(validCommand().precio(-0.01).build(), "El precio debe ser mayor o igual a cero"),
-				Arguments.of(validCommand().categoria(null).build(), "La categoría es obligatoria"),
-				Arguments.of(validCommand().categoria("").build(), "La categoría es obligatoria"),
-				Arguments.of(validCommand().stock(-1).build(), "El stock no puede ser negativo"));
+				Arguments.of(command(null, "Laptop empresarial", 1200.50, "Tecnología", 10), "El nombre es obligatorio"),
+				Arguments.of(command("  ", "Laptop empresarial", 1200.50, "Tecnología", 10), "El nombre es obligatorio"),
+				Arguments.of(command("Laptop Lenovo ThinkPad", "Laptop empresarial", null, "Tecnología", 10),
+						"El precio debe ser mayor o igual a cero"),
+				Arguments.of(command("Laptop Lenovo ThinkPad", "Laptop empresarial", -0.01, "Tecnología", 10),
+						"El precio debe ser mayor o igual a cero"),
+				Arguments.of(command("Laptop Lenovo ThinkPad", "Laptop empresarial", 1200.50, null, 10),
+						"La categoría es obligatoria"),
+				Arguments.of(command("Laptop Lenovo ThinkPad", "Laptop empresarial", 1200.50, "", 10),
+						"La categoría es obligatoria"),
+				Arguments.of(command("Laptop Lenovo ThinkPad", "Laptop empresarial", 1200.50, "Tecnología", -1),
+						"El stock no puede ser negativo"));
 	}
 
 	@ParameterizedTest
