@@ -2,19 +2,15 @@ package com.nttdata.product.infrastructure.adapter.out.persistence.entity;
 
 import java.time.OffsetDateTime;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 /**
  * Representación de persistencia del producto. Se mantiene separada del modelo de dominio para
  * poder cambiar el almacenamiento (p. ej. JPA/MongoDB) sin tocar el dominio.
  */
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ProductEntity {
 
 	private String id;

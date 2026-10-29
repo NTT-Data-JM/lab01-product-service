@@ -103,7 +103,7 @@ con ArchUnit: si se rompen, el build falla.
 Uso de **Lombok**:
 
 - Modelo de dominio y comandos: `@Value` + `@Builder` (inmutables).
-- Entidades de persistencia: `@Data` + `@Builder` + constructores.
+- Entidades de persistencia: `@Getter` + `@Builder`.
 - Inyección de dependencias: `@RequiredArgsConstructor` con campos `private final` (sin `@Autowired`).
 - Logs: `@Slf4j`.
 - [lombok.config](lombok.config) marca el código generado con `@Generated`, por lo que JaCoCo no lo cuenta en la cobertura.
