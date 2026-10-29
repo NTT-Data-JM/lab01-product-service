@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Product Service",
+    "description": "Colección para probar el catálogo de productos. Ejecuta la carpeta en orden con el servicio en http://localhost:8088. La primera petición espera 204 y solo pasa si el catálogo en memoria está vacío (reinicia la aplicación antes de correr toda la colección).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8088"
+    },
+    {
+      "key": "productId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Listar productos (catálogo vacío)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('204 cuando no hay productos', function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "pm.test('sin cuerpo', function () {",
+              "    pm.expect(pm.response.text()).to.eql('');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/product",
+        "description": "GET /api/product. Responde 204 si la colección en memoria está vacía."
+      }
+    },
+    {
+      "name": "Consultar SKU inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('204 cuando el SKU no existe', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/product/sku-inexistente",
+        "description": "GET /api/product/{id}. Responde 204 si el SKU no está registrado."
+      }
+    },
+    {
+      "name": "Registrar producto inválido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 datos inválidos', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('cuerpo de error', function () {",
+              "    pm.expect(body.codigo).to.eql('DATOS_INVALIDOS');",
+              "    pm.expect(body.mensaje).to.be.a('string').and.not.empty;",
+              "    pm.expect(body.detalle).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \" \",\n  \"precio\": -1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/product",
+        "description": "POST /api/product. Responde 400 cuando faltan datos obligatorios o el precio es negativo."
+      }
+    },
+    {
+      "name": "Registrar producto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 producto registrado', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('productId', body._id);",
+              "pm.test('devuelve el producto con SKU generado', function () {",
+              "    pm.expect(body._id).to.be.a('string').and.not.empty;",
+              "    pm.expect(body.nombre).to.eql('Laptop Lenovo ThinkPad');",
+              "    pm.expect(body.descripcion).to.eql('Laptop empresarial con 16GB RAM');",
+              "    pm.expect(body.precio).to.eql(1200.5);",
+              "    pm.expect(body.categoria).to.eql('Tecnología');",
+              "    pm.expect(body.stock).to.eql(10);",
+              "    pm.expect(body.fechaCreacion).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Laptop Lenovo ThinkPad\",\n  \"descripcion\": \"Laptop empresarial con 16GB RAM\",\n  \"precio\": 1200.50,\n  \"categoria\": \"Tecnología\",\n  \"stock\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/product",
+        "description": "POST /api/product. Guarda el SKU generado en la variable productId."
+      }
+    },
+    {
+      "name": "Listar productos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 listado de productos', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const products = pm.response.json();",
+              "pm.test('incluye el producto registrado', function () {",
+              "    pm.expect(products).to.be.an('array').that.is.not.empty;",
+              "    const created = products.find((product) => product._id === pm.collectionVariables.get('productId'));",
+              "    pm.expect(created).to.be.an('object');",
+              "    pm.expect(created.nombre).to.eql('Laptop Lenovo ThinkPad');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/product",
+        "description": "GET /api/product. Responde 200 con los productos registrados."
+      }
+    },
+    {
+      "name": "Consultar producto por SKU",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 producto encontrado', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test('coincide con el SKU registrado', function () {",
+              "    pm.expect(body._id).to.eql(pm.collectionVariables.get('productId'));",
+              "    pm.expect(body.nombre).to.eql('Laptop Lenovo ThinkPad');",
+              "    pm.expect(body.categoria).to.eql('Tecnología');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/product/{{productId}}",
+        "description": "GET /api/product/{id}. Usa el SKU guardado por Registrar producto."
+      }
+    }
+  ]
+}
